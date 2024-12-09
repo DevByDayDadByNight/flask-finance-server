@@ -6,10 +6,6 @@ services:
       context: .
     ports:
       - "5000:5000"
-    volumes:
-      - .:/app  # Mount the current directory to /app in the container
-      - ./uploads:/app/uploads  # Persist uploaded files
-      - ./service-account-key.json:/app/service-account-key.json  # Mount Google Sheets credentials
     environment:
       - FLASK_ENV=development
       - PYTHONUNBUFFERED=1
