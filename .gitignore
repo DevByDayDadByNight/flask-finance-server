@@ -1,0 +1,96 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+*.env
+
+# Flask-Specific
+instance/
+instance/*
+
+# Logs
+*.log
+*.out
+*.err
+logs/
+
+# Database files
+*.sqlite3
+*.db
+*.db-journal
+
+# Cache and temporary files
+*.swp
+*.swo
+*.bak
+*.tmp
+*.old
+.cache/
+*.log
+
+# Virtual Environment
+venv/
+.venv/
+
+# Docker
+docker-compose.override.yml
+docker-compose.override.*.yml
+.dockerignore
+
+# Python distribution / packaging
+build/
+dist/
+*.egg-info/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+.coverage
+.tox/
+.nox/
+*.coverage.*
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+pytest_cache/
+factory_boy_cache/
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# MacOS-specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows-specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Other backups
+*.bak
+*.tmp
+~$*
+

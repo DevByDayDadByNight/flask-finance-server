@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  flask_app:
+    build:
+      context: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads  # Persist uploaded files
+      - ./service-account-key.json:/app/service-account-key.json  # Mount Google Sheets credentials
+    environment:
+      - FLASK_ENV=development
+      - PYTHONUNBUFFERED=1
+    restart: always
