@@ -3,12 +3,35 @@ from google_sheets import get_google_sheet
 from comparison import compare_and_update_google_sheet
 import pandas as pd
 from datetime import datetime
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+
+
+
+
+
 
 app = Flask(__name__)
+app.config["JWT_SECRET_KEY"] = "23kl4j2l3k4j234242/4234kl3jlqkjffd&adfkjaljkdflkdjfaljdfalfdadfadfafgafda23kl4j23lk4j2l34jl23kjlksljafoa09801280178r82349678"
+
+jwt = JWTManager(app)
+
 
 # Configure Google Sheets
 SHEET_NAME = 'Finances'  # Google Sheets file name
 WORKSHEET_NAME = 'Spend Record'     # Worksheet name (tab name)
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
+
+    # Replace this with your user verification logic
+    if username == "admin" and password == "password":
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token), 200
+    else:
+        return jsonify({"msg": "Invalid credentials"}), 401
+
 
 # Utility function to fetch transactions
 def fetch_transactions(sheet, start_date=None, end_date=None):
@@ -29,7 +52,11 @@ def fetch_transactions(sheet, start_date=None, end_date=None):
     return df.to_dict(orient="records")
 
 @app.route("/transactions", methods=["GET"])
+@jwt_required()
 def get_transactions():
+    current_user = get_jwt_identity()
+    if current_user != "admin":
+        return jsonify({"msg": "You are not authorized to access this resource"}), 403
     """Fetch transactions within a date range."""
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
@@ -45,7 +72,11 @@ def get_transactions():
     return jsonify(transactions)
 
 @app.route("/transaction/<int:row_number>", methods=["PUT"])
+@jwt_required()
 def update_transaction(row_number):
+    current_user = get_jwt_identity()
+    if current_user != "admin":
+        return jsonify({"msg": "You are not authorized to access this resource"}), 403
     """Update a transaction's category."""
     new_category = request.json.get("category")
 
@@ -64,7 +95,11 @@ def index():
     return render_template('index.html')
 
 @app.route('/upload', methods=['POST'])
+@jwt_required()
 def upload_file():
+    current_user = get_jwt_identity()
+    if current_user != "admin":
+        return jsonify({"msg": "You are not authorized to access this resource"}), 403
     """Handle the CSV upload, compare with Google Sheets, and update the sheet."""
     if 'file' not in request.files:
         return redirect(request.url)
@@ -90,7 +125,11 @@ def upload_file():
     return redirect(request.url)
 
 @app.route("/transactions", methods=["POST"])
+@jwt_required()
 def upload_csv():
+    current_user = get_jwt_identity()
+    if current_user != "admin":
+        return jsonify({"msg": "You are not authorized to access this resource"}), 403
     """Upload a CSV file and update Google Sheets."""
     file = request.files.get("file")
     if not file or file.filename == "":
