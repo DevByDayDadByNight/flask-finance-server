@@ -33,21 +33,25 @@ def login():
         return jsonify({"msg": "Invalid credentials"}), 401
 
 
-# Utility function to fetch transactions
 def fetch_transactions(sheet, start_date=None, end_date=None):
-    """Fetch transactions optionally filtered by date range."""
+    """Fetch transactions optionally filtered by date range, including rowNumber."""
     sheet_data = sheet.get_all_records()
     df = pd.DataFrame(sheet_data)
 
+    # Ensure row numbers are preserved as "rowNumber"
+    df.reset_index(inplace=True)  # Reset index to get a numerical row index
+    df["rowNumber"] = df.index + 2  # Adjust for 1-based Google Sheets indexing (including header row)
+
+    post_date_column = "Post Date"
     # Ensure date columns are datetime objects
-    if "Transaction Date" in df.columns:
-        df["Transaction Date"] = pd.to_datetime(df["Transaction Date"], errors="coerce")
+    if post_date_column in df.columns:
+        df[post_date_column] = pd.to_datetime(df[post_date_column], errors="coerce")
 
     # Filter by date range
     if start_date:
-        df = df[df["Transaction Date"] >= start_date]
+        df = df[df[post_date_column] >= start_date]
     if end_date:
-        df = df[df["Transaction Date"] <= end_date]
+        df = df[df[post_date_column] <= end_date]
 
     return df.to_dict(orient="records")
 
