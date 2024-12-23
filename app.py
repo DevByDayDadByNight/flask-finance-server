@@ -11,9 +11,6 @@ from werkzeug.utils import secure_filename
 
 
 
-
-
-
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = "23kl4j2l3k4j234242/4234kl3jlqkjffd&adfkjaljkdflkdjfaljdfalfdadfadfafgafda23kl4j23lk4j2l34jl23kjlksljafoa09801280178r82349678"
 
