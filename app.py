@@ -43,9 +43,17 @@ def fetch_transactions(sheet, start_date=None, end_date=None):
     df["rowNumber"] = df.index + 2  # Adjust for 1-based Google Sheets indexing (including header row)
 
     post_date_column = "Post Date"
+    category_column = "Category"
+
     # Ensure date columns are datetime objects
     if post_date_column in df.columns:
         df[post_date_column] = pd.to_datetime(df[post_date_column], errors="coerce")
+
+    # Preserve null or missing values for the "Category" column
+    if category_column in df.columns:
+        df[category_column] = df[category_column].fillna(None)  # Ensure missing values are explicitly None
+    else:
+        df[category_column] = None  # Add "Category" column if it doesn't exist, with all values set to None
 
     # Filter by date range
     if start_date:
