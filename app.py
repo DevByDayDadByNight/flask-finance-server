@@ -185,20 +185,60 @@ def upload_csv():
     current_user = get_jwt_identity()
     if current_user != "admin":
         return jsonify({"msg": "You are not authorized to access this resource"}), 403
-    """Upload a CSV file and update Google Sheets."""
+
+    # Check if file is uploaded
     file = request.files.get("file")
     if not file or file.filename == "":
         return jsonify({"error": "No file provided"}), 400
 
-    # Save and process the file
-    file_path = f"uploads/{file.filename}"
+    # Save the uploaded file
+    filename = secure_filename(file.filename)
+    file_path = os.path.join("uploads", filename)
+    os.makedirs("uploads", exist_ok=True)  # Ensure the upload folder exists
     file.save(file_path)
 
-    sheet = get_google_sheet(SHEET_NAME, WORKSHEET_NAME)
-    comparison_columns = ["Transaction Date", "Post Date", "Description", "Amount"]
-    new_rows_added = compare_and_update_google_sheet(file_path, sheet, comparison_columns)
+    try:
+        # Read the CSV file
+        df = pd.read_csv(file_path)
 
-    return jsonify({"message": f"{new_rows_added} transactions added successfully"})
+        # Ensure required columns exist
+        required_columns = ["Transaction Date", "Post Date", "Description", "Amount"]
+        for col in required_columns:
+            if col not in df.columns:
+                return jsonify({"error": f"Missing required column: {col}"}), 400
+
+        # Process and add transactions to the database
+        new_transactions = []
+        for _, row in df.iterrows():
+            # Check for duplicates in the database
+            duplicate = Transaction.query.filter_by(
+                post_date=row["Post Date"],
+                description=row["Description"],
+                amount=row["Amount"]
+            ).first()
+
+            if duplicate:
+                continue  # Skip duplicates
+
+            # Create a new transaction
+            transaction = Transaction(
+                transaction_date=row["Transaction Date"],
+                post_date=row["Post Date"],
+                description=row["Description"],
+                amount=row["Amount"],
+                category=row.get("Category")  # Optional column
+            )
+            new_transactions.append(transaction)
+
+        # Bulk insert new transactions
+        db.session.bulk_save_objects(new_transactions)
+        db.session.commit()
+
+        # Return the count of added transactions
+        return jsonify({"message": f"{len(new_transactions)} transactions added successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to process the CSV file: {str(e)}"}), 500
 
 def allowed_file(filename):
     """Check if the uploaded file is a valid CSV file."""
