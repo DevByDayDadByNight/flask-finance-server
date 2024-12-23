@@ -1,9 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask_sqlalchemy import SQLAlchemy
 from google_sheets import get_google_sheet
 from comparison import compare_and_update_google_sheet
-import pandas as pd
 from datetime import datetime
+from models import db, Transaction
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+import os
+import pandas as pd
+from werkzeug.utils import secure_filename
 
 
 
@@ -15,10 +19,14 @@ app.config["JWT_SECRET_KEY"] = "23kl4j2l3k4j234242/4234kl3jlqkjffd&adfkjaljkdflk
 
 jwt = JWTManager(app)
 
+# Configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///transactions.db'  # SQLite for local dev
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Configure Google Sheets
-SHEET_NAME = 'Finances'  # Google Sheets file name
-WORKSHEET_NAME = 'Spend Record'     # Worksheet name (tab name)
+db.init_app(app)
+with app.app_context():
+    db.create_all()
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -33,73 +41,73 @@ def login():
         return jsonify({"msg": "Invalid credentials"}), 401
 
 
-def fetch_transactions(sheet, start_date=None, end_date=None):
-    """Fetch transactions optionally filtered by date range, including rowNumber."""
-    sheet_data = sheet.get_all_records()
-    df = pd.DataFrame(sheet_data)
+def fetch_transactions(start_date=None, end_date=None):
+    """Fetch transactions optionally filtered by date range."""
+    query = Transaction.query
 
-    # Ensure row numbers are preserved as "rowNumber"
-    df.reset_index(inplace=True)  # Reset index to get a numerical row index
-    df["rowNumber"] = df.index + 2  # Adjust for 1-based Google Sheets indexing (including header row)
-
-    post_date_column = "Post Date"
-    category_column = "Category"
-
-    # Ensure date columns are datetime objects
-    if post_date_column in df.columns:
-        df[post_date_column] = pd.to_datetime(df[post_date_column], errors="coerce")
-
-    # Preserve null or missing values for the "Category" column
-    if category_column in df.columns:
-        df[category_column] = df[category_column].fillna("")  # Ensure missing values are explicitly None
-    else:
-        df[category_column] = ""  # Add "Category" column if it doesn't exist, with all values set to None
-
-    # Filter by date range
+    # Apply date range filters
     if start_date:
-        df = df[df[post_date_column] >= start_date]
+        query = query.filter(Transaction.post_date >= datetime.strptime(start_date, "%Y-%m-%d"))
     if end_date:
-        df = df[df[post_date_column] <= end_date]
+        query = query.filter(Transaction.post_date <= datetime.strptime(end_date, "%Y-%m-%d"))
 
-    return df.to_dict(orient="records")
+    # Fetch results and convert to a list of dictionaries
+    transactions = query.all()
+    return [
+        {
+            "id": txn.id,
+            "transactionDate": txn.transaction_date.strftime("%Y-%m-%d") if txn.transaction_date else None,
+            "postDate": txn.post_date.strftime("%Y-%m-%d") if txn.post_date else None,
+            "description": txn.description,
+            "amount": txn.amount,
+            "category": txn.category,
+            "rowNumber": txn.row_number
+        }
+        for txn in transactions
+    ]
 
-@app.route("/transactions", methods=["GET"])
+@app.route('/transactions', methods=['GET'])
 @jwt_required()
 def get_transactions():
-    current_user = get_jwt_identity()
-    if current_user != "admin":
-        return jsonify({"msg": "You are not authorized to access this resource"}), 403
-    """Fetch transactions within a date range."""
-    start_date = request.args.get("start_date")
-    end_date = request.args.get("end_date")
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
 
-    # Parse dates
-    start_date = pd.to_datetime(start_date, errors="coerce") if start_date else None
-    end_date = pd.to_datetime(end_date, errors="coerce") if end_date else None
-
-    # Fetch Google Sheet
-    sheet = get_google_sheet(SHEET_NAME, WORKSHEET_NAME)
-    transactions = fetch_transactions(sheet, start_date, end_date)
-
+    transactions = fetch_transactions(start_date=start_date, end_date=end_date)
     return jsonify(transactions)
 
-@app.route("/transaction/<int:row_number>", methods=["PUT"])
+@app.route('/update_transaction/<int:transaction_id>', methods=['PUT'])
 @jwt_required()
-def update_transaction(row_number):
-    current_user = get_jwt_identity()
-    if current_user != "admin":
-        return jsonify({"msg": "You are not authorized to access this resource"}), 403
-    """Update a transaction's category."""
-    new_category = request.json.get("category")
+def update_transaction(transaction_id):
+    """Update a transaction by ID."""
+    try:
+        # Retrieve the transaction to update
+        transaction = Transaction.query.get(transaction_id)
+        if not transaction:
+            return jsonify({"error": "Transaction not found"}), 404
 
-    if not new_category:
-        return jsonify({"error": "Category is required"}), 400
+        # Get JSON data from the request
+        data = request.json
 
-    # Fetch Google Sheet
-    sheet = get_google_sheet(SHEET_NAME, WORKSHEET_NAME)
-    sheet.update_cell(row_number, 5, new_category)  # Assume "Category" is in column 5
+        # Update fields if they exist in the request
+        if "transactionDate" in data:
+            transaction.transaction_date = datetime.strptime(data["transactionDate"], "%Y-%m-%d")
+        if "postDate" in data:
+            transaction.post_date = datetime.strptime(data["postDate"], "%Y-%m-%d")
+        if "description" in data:
+            transaction.description = data["description"]
+        if "amount" in data:
+            transaction.amount = float(data["amount"])
+        if "category" in data:
+            transaction.category = data["category"]
 
-    return jsonify({"message": "Transaction updated successfully"})
+        # Commit changes to the database
+        db.session.commit()
+
+        return jsonify({"message": "Transaction updated successfully"}), 200
+
+    except Exception as e:
+        app.logger.error(f"Error updating transaction: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
 @app.route('/')
 def index():
@@ -112,29 +120,64 @@ def upload_file():
     current_user = get_jwt_identity()
     if current_user != "admin":
         return jsonify({"msg": "You are not authorized to access this resource"}), 403
-    """Handle the CSV upload, compare with Google Sheets, and update the sheet."""
+
+    # Check if the file is present
     if 'file' not in request.files:
-        return redirect(request.url)
+        return jsonify({"msg": "No file uploaded"}), 400
 
     file = request.files['file']
     if file.filename == '' or not allowed_file(file.filename):
-        return redirect(request.url)
+        return jsonify({"msg": "Invalid file"}), 400
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
-        
-        # Connect to Google Sheets and fetch the worksheet
-        google_sheet = get_google_sheet(SHEET_NAME, WORKSHEET_NAME)
-        
-        comparison_columns = ['Transaction Date', 'Post Date', 'Description', 'Amount']
-        # Compare and update Google Sheet
-        new_rows_added = compare_and_update_google_sheet(file_path, google_sheet, comparison_columns)
 
-        return render_template('result.html', new_rows_added=new_rows_added)
+        # Parse the CSV file
+        try:
+            df = pd.read_csv(file_path)
 
-    return redirect(request.url)
+            # Ensure required columns exist
+            required_columns = ['Transaction Date', 'Post Date', 'Description', 'Amount']
+            for col in required_columns:
+                if col not in df.columns:
+                    return jsonify({"msg": f"Missing column: {col}"}), 400
+
+            # Add transactions, skipping duplicates
+            new_transactions = []
+            for _, row in df.iterrows():
+                # Check for duplicates in the database
+                duplicate = Transaction.query.filter_by(
+                    post_date=row['Post Date'],
+                    description=row['Description'],
+                    amount=row['Amount']
+                ).first()
+
+                if duplicate:
+                    # Skip duplicate transactions
+                    continue
+
+                # Add non-duplicate transactions
+                transaction = Transaction(
+                    transaction_date=row['Transaction Date'],
+                    post_date=row['Post Date'],
+                    description=row['Description'],
+                    amount=row['Amount'],
+                    category=row.get('Category')  # Optional column
+                )
+                new_transactions.append(transaction)
+
+            # Commit new transactions to the database
+            db.session.bulk_save_objects(new_transactions)
+            db.session.commit()
+
+            return render_template('result.html', new_rows_added=len(new_transactions))
+
+        except Exception as e:
+            return jsonify({"msg": f"Error processing file: {str(e)}"}), 500
+
+    return jsonify({"msg": "File upload failed"}), 400
 
 @app.route("/transactions", methods=["POST"])
 @jwt_required()
@@ -160,6 +203,7 @@ def upload_csv():
 def allowed_file(filename):
     """Check if the uploaded file is a valid CSV file."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
