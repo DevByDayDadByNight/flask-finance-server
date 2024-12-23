@@ -51,9 +51,9 @@ def fetch_transactions(sheet, start_date=None, end_date=None):
 
     # Preserve null or missing values for the "Category" column
     if category_column in df.columns:
-        df[category_column] = df[category_column].fillna(None)  # Ensure missing values are explicitly None
+        df[category_column] = df[category_column].fillNa("")  # Ensure missing values are explicitly None
     else:
-        df[category_column] = None  # Add "Category" column if it doesn't exist, with all values set to None
+        df[category_column] = ""  # Add "Category" column if it doesn't exist, with all values set to None
 
     # Filter by date range
     if start_date:
