@@ -13,7 +13,10 @@ services:
       MYSQL_USER: bookkeeper_user
       MYSQL_PASSWORD: bookkeeper_user_sql_password_for_a_long_time
       MYSQL_HOST: mysql
+      FLASK_APP: app.py
+      FLASK_RUN_HOST: 0.0.0.0
     restart: always
+    command: flask run  # Starts the app using Flask CLI
     depends_on:
       - mysql
 
