@@ -3,10 +3,40 @@ version: '3'
 services:
   flask_app:
     build:
-      context: .
+      context: ./flask-finance-server
     ports:
       - "5000:5000"
     environment:
-      - FLASK_ENV=development
-      - PYTHONUNBUFFERED=1
+      FLASK_ENV: development
+      PYTHONUNBUFFERED: 1
+      MYSQL_DATABASE: bookkeeper_db
+      MYSQL_USER: bookkeeper_user
+      MYSQL_PASSWORD: bookkeeper_user_sql_password_for_a_long_time
+      MYSQL_HOST: mysql
     restart: always
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootimus_maximus
+      MYSQL_DATABASE: bookkeeper_db
+      MYSQL_USER: bookkeeper_user
+      MYSQL_PASSWORD: bookkeeper_user_sql_password_for_a_long_time
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+  
+  react-frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:80"  # Serve React on port 3000 (Nginx default is 80)
+    environment:
+      REACT_APP_API_URL: "http://localhost:6000"  # URL to Flask API
+volumes:
+  mysql_data:
