@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://127.0.0.1:5000", // Flask backend URL
+  baseURL: "https://homelab.servequake.com/", // Flask backend URL
 });
 
 // Add Authorization header if token is present

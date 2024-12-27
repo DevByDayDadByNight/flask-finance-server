@@ -37,9 +37,10 @@ services:
   react-frontend:
     build:
       context: ./frontend
+    environment:
+      REACT_APP_API_URL: "http://127.0.0.1:5000"  # URL to Flask API
     ports:
       - "3000:80"  # Serve React on port 3000 (Nginx default is 80)
-    environment:
-      REACT_APP_API_URL: "http://localhost:6000"  # URL to Flask API
+    command: ["nginx", "-g", "daemon off;"]  # Start Nginx
 volumes:
   mysql_data:
