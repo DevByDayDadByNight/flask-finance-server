@@ -8,6 +8,7 @@ import os
 from app_creator import app
 import pandas as pd
 from werkzeug.utils import secure_filename
+from flask_migrate import Migrate
 
 
 
@@ -15,6 +16,7 @@ from werkzeug.utils import secure_filename
 
 with app.app_context():
     db.create_all()
+    Migrate(app, db)
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -48,7 +50,8 @@ def fetch_transactions(start_date=None, end_date=None):
             "postDate": txn.post_date.strftime("%Y-%m-%d") if txn.post_date else None,
             "description": txn.description,
             "amount": txn.amount,
-            "category": txn.category
+            "category": txn.category,
+            "account": txn.account
         }
         for txn in transactions
     ]
@@ -86,6 +89,8 @@ def update_transaction(transaction_id):
             transaction.amount = float(data["amount"])
         if "category" in data:
             transaction.category = data["category"]
+        if "account" in data:
+            transaction.account = data["account"]
 
         # Commit changes to the database
         db.session.commit()

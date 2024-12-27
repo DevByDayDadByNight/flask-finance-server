@@ -7,4 +7,5 @@ class Transaction(db.Model):
     post_date = db.Column(db.Date, nullable=False)          # Use db.Date for dates
     description = db.Column(db.String(255), nullable=False)
     amount = db.Column(db.Float, nullable=False)
-    category = db.Column(db.String(100), nullable=True)  
+    category = db.Column(db.String(100), nullable=True)
+    account = db.Column(db.String(100), nullable=True)
