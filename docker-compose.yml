@@ -38,6 +38,8 @@ services:
       - mysql_data:/var/lib/mysql
   
   react-frontend:
+    build:
+      context: ./frontend
     ports:
       - "3000:80"  # Serve React on port 3000 (Nginx default is 80)
     command: ["nginx", "-g", "daemon off;"]  # Start Nginx
