@@ -73,7 +73,7 @@ def get_transactions():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
-    transactions = fetch_transactions(start_date="2024-11-11", end_date="2024-12-10")
+    transactions = fetch_transactions(start_date=start_date, end_date=end_date)
     return jsonify(transactions)
 
 @app.route('/update_transaction/<int:transaction_id>', methods=['PUT'])
