@@ -89,6 +89,9 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
+migrations/
+uploads/
+
 # Other backups
 *.bak
 *.tmp

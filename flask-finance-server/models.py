@@ -9,3 +9,11 @@ class Transaction(db.Model):
     amount = db.Column(db.Float, nullable=False)
     category = db.Column(db.String(100), nullable=True)
     account = db.Column(db.String(100), nullable=True)
+
+    # Add a unique constraint
+    __table_args__ = (
+        db.UniqueConstraint(
+            'transaction_date', 'post_date', 'description', 'amount',
+            name='uq_transaction'
+        ),
+    )

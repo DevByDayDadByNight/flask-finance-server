@@ -9,6 +9,12 @@ from app_creator import app
 import pandas as pd
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
+from sqlalchemy.exc import IntegrityError as SQLAlchemyIntegrityError
+from mysql.connector.errors import IntegrityError as MySQLIntegrityError
+
+import logging
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 
 
@@ -37,10 +43,15 @@ def fetch_transactions(start_date=None, end_date=None):
 
     # Apply date range filters
     if start_date:
-        query = query.filter(Transaction.post_date >= datetime.strptime(start_date, "%Y-%m-%d"))
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        print("Start Date:", start_date)  # Debug
+        query = query.filter(Transaction.post_date >= start_date)
     if end_date:
-        query = query.filter(Transaction.post_date <= datetime.strptime(end_date, "%Y-%m-%d"))
+        end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+        print("End Date:", end_date)  # Debug
+        query = query.filter(Transaction.post_date <= end_date)
 
+    print(query)
     # Fetch results and convert to a list of dictionaries
     transactions = query.all()
     return [
@@ -62,7 +73,7 @@ def get_transactions():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
-    transactions = fetch_transactions(start_date=start_date, end_date=end_date)
+    transactions = fetch_transactions(start_date="2024-11-11", end_date="2024-12-10")
     return jsonify(transactions)
 
 @app.route('/update_transaction/<int:transaction_id>', methods=['PUT'])
@@ -143,24 +154,21 @@ def upload_file():
 
         # Insert transactions into the database, skipping duplicates
         new_transactions = []
+        df["Account"] = df["Account"].fillna("")
         for _, row in df.iterrows():
              # Convert date strings to Python date objects
             transaction_date = datetime.strptime(row["Transaction Date"], "%m/%d/%Y").date()
             post_date = datetime.strptime(row["Post Date"], "%m/%d/%Y").date()
-            duplicate = Transaction.query.filter_by(
+            account = row.get("Account", "")
+            transaction = Transaction(
+                transaction_date=transaction_date,
                 post_date=post_date,
                 description=row["Description"],
-                amount=row["Amount"]
-            ).first()
-            if not duplicate:
-                transaction = Transaction(
-                    transaction_date=transaction_date,
-                    post_date=post_date,
-                    description=row["Description"],
-                    amount=row["Amount"],
-                    category=row.get("Category")
-                )
-                new_transactions.append(transaction)
+                amount=row["Amount"],
+                category=row.get("Category"),
+                account=account
+            )
+            new_transactions.append(transaction)
 
         db.session.bulk_save_objects(new_transactions)
         db.session.commit()
@@ -170,8 +178,16 @@ def upload_file():
             "message": "CSV uploaded successfully",
             "new_transactions_added": len(new_transactions)
         }), 200
+    except (SQLAlchemyIntegrityError, MySQLIntegrityError) as e:
+        # Handle the specific IntegrityError
 
+        return jsonify({
+            'error': 'IntegrityError',
+            'message': str(e),
+            'code': 1001  # Your unique error code
+        }), 400
     except Exception as e:
+        print(f"Error: {e}")
         # Handle any errors during CSV processing
         return jsonify({"error": f"Failed to process the CSV file: {str(e)}"}), 500
 

@@ -16,6 +16,9 @@ services:
       FLASK_APP: app.py
       FLASK_RUN_HOST: 0.0.0.0
     restart: always
+    volumes:
+      - ./migrations:/app/migrations  # Persist migrations
+      - ./flask-finance-server:/app  # Map the app source code (optional)
     command: flask run  # Starts the app using Flask CLI
     depends_on:
       - mysql
