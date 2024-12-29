@@ -16,7 +16,7 @@ API.interceptors.request.use((config) => {
 export const login = (username, password) =>
   API.post("/login", { username, password });
 
-export const getTransactions = () => API.get("/transactions");
+export const getTransactions = () => API.get("/transactions?start_date=2024-12-11&end_date=2025-1-10");
 
 export const uploadCSV = (file) => {
   const formData = new FormData();

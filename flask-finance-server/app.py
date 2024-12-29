@@ -11,6 +11,8 @@ from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError as SQLAlchemyIntegrityError
 from mysql.connector.errors import IntegrityError as MySQLIntegrityError
+from sqlalchemy.dialects.mysql import insert  # Import MySQL-specific insert
+
 
 import logging
 logging.basicConfig()
@@ -117,6 +119,34 @@ def index():
     """Render the upload form."""
     return render_template('index.html')
 
+
+import pandas as pd
+
+def deduplicate_csv(df):
+    """
+    Deduplicate transactions in a CSV file by appending _duplicateX to the Description field.
+
+    Returns:
+        pd.DataFrame: A deduplicated DataFrame with updated descriptions for duplicates.
+    """
+    # Check required columns
+    required_columns = ['Transaction Date', 'Post Date', 'Amount', 'Description']
+    for col in required_columns:
+        if col not in df.columns:
+            raise ValueError(f"Missing required column: {col}")
+    
+    # Create a groupby object based on the columns that define uniqueness
+    grouped = df.groupby(['Transaction Date', 'Post Date', 'Amount', 'Description'])
+    
+    # Iterate over each group and handle duplicates
+    for _, group in grouped:
+        if len(group) > 1:  # Only process duplicates
+            for idx, row_index in enumerate(group.index):
+                original_description = df.loc[row_index, 'Description']
+                df.loc[row_index, 'Description'] = f"{original_description}_duplicate{idx}"
+    
+    return df
+
 @app.route('/upload', methods=['POST'])
 @jwt_required()
 def upload_file():
@@ -145,7 +175,7 @@ def upload_file():
     try:
         # Parse the CSV file
         df = pd.read_csv(file_path)
-
+        df = deduplicate_csv(df)
         # Ensure required columns exist
         required_columns = ["Transaction Date", "Post Date", "Description", "Amount"]
         for col in required_columns:
@@ -154,7 +184,9 @@ def upload_file():
 
         # Insert transactions into the database, skipping duplicates
         new_transactions = []
-        df["Account"] = df["Account"].fillna("")
+        if 'Account' in df.columns:
+            df["Account"] = df["Account"].fillna("")
+        
         for _, row in df.iterrows():
              # Convert date strings to Python date objects
             transaction_date = datetime.strptime(row["Transaction Date"], "%m/%d/%Y").date()
@@ -165,13 +197,12 @@ def upload_file():
                 post_date=post_date,
                 description=row["Description"],
                 amount=row["Amount"],
-                category=row.get("Category"),
+                category="",
                 account=account
             )
             new_transactions.append(transaction)
 
-        db.session.bulk_save_objects(new_transactions)
-        db.session.commit()
+        upsert_transactions(new_transactions)
 
         # Return the count of new transactions added
         return jsonify({
@@ -190,6 +221,33 @@ def upload_file():
         print(f"Error: {e}")
         # Handle any errors during CSV processing
         return jsonify({"error": f"Failed to process the CSV file: {str(e)}"}), 500
+
+
+def upsert_transactions(transactions):
+    """
+    Perform a bulk upsert on the Transaction table for MySQL.
+    
+    Args:
+        transactions (list[dict]): List of transactions to insert or update.
+    """
+    transaction_dicts = [
+        {
+            "transaction_date": txn.transaction_date,
+            "post_date": txn.post_date,
+            "description": txn.description,
+            "amount": txn.amount,
+            "category": txn.category,
+            "account": txn.account,
+        }
+        for txn in transactions
+    ]
+
+    # Use INSERT IGNORE for bulk insertion
+    stmt = insert(Transaction).values(transaction_dicts).prefix_with("IGNORE")
+
+    # Execute the statement in a transaction
+    with db.session.begin():
+        db.session.execute(stmt)
 
 
 def allowed_file(filename):
