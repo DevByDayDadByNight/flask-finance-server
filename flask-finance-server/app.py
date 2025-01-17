@@ -3,7 +3,7 @@ from comparison import compare_and_update_google_sheet
 from datetime import datetime
 from models import Transaction
 from db_creator import db
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 import os
 from app_creator import app
 import pandas as pd
@@ -34,9 +34,17 @@ def login():
     # Replace this with your user verification logic
     if username == "admin" and password == "password":
         access_token = create_access_token(identity=username)
+        refresh_token = create_refresh_token(identity=username)
         return jsonify(access_token=access_token), 200
     else:
         return jsonify({"msg": "Invalid credentials"}), 401
+
+@app.route("/refresh", methods=["POST"])
+@jwt_required(refresh=True)  # Ensure only refresh tokens are allowed here
+def refresh():
+    current_user = get_jwt_identity()  # Get the identity from the refresh token
+    new_access_token = create_access_token(identity=current_user)  # Create a new access token
+    return jsonify(access_token=new_access_token)
 
 
 def fetch_transactions(start_date=None, end_date=None):
