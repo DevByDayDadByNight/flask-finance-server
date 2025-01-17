@@ -16,7 +16,7 @@ app.config['ALLOWED_EXTENSIONS'] = {'csv'}
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 
 # Configure token expiration times
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=15)  # Access token expires in 15 minutes
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=1)  # Access token expires in 15 minutes
 app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)  # Refresh token expires in 30 days
 
 app.config['ALLOWED_EXTENSIONS'] = {'csv'}
