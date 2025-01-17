@@ -35,7 +35,7 @@ def login():
     if username == "admin" and password == "password":
         access_token = create_access_token(identity=username)
         refresh_token = create_refresh_token(identity=username)
-        return jsonify(access_token=access_token), 200
+        return jsonify(access_token=access_token, refresh_token=refresh_token), 200
     else:
         return jsonify({"msg": "Invalid credentials"}), 401
 
@@ -44,7 +44,8 @@ def login():
 def refresh():
     current_user = get_jwt_identity()  # Get the identity from the refresh token
     new_access_token = create_access_token(identity=current_user)  # Create a new access token
-    return jsonify(access_token=new_access_token)
+    refresh_token = create_refresh_token(identity=username)
+    return jsonify(access_token=new_access_token, refresh_token=refresh_token)
 
 
 def fetch_transactions(start_date=None, end_date=None):
