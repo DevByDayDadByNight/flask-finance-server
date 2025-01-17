@@ -44,7 +44,7 @@ def login():
 def refresh():
     current_user = get_jwt_identity()  # Get the identity from the refresh token
     new_access_token = create_access_token(identity=current_user)  # Create a new access token
-    refresh_token = create_refresh_token(identity=username)
+    refresh_token = create_refresh_token(identity=current_user)
     return jsonify(access_token=new_access_token, refresh_token=refresh_token)
 
 
