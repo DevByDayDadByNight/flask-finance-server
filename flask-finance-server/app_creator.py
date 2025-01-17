@@ -2,6 +2,7 @@ from flask_cors import CORS
 import os
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask import Flask, render_template, request, redirect, url_for, jsonify
+from datetime import timedelta
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = "23kl4j2l3k4j234242/4234kl3jlqkjffd&adfkjaljkdflkdjfaljdfalfdadfadfafgafda23kl4j23lk4j2l34jl23kjlksljafoa09801280178r82349678"
