@@ -1,0 +1,58 @@
+/* Styles for the BudgetList component */
+
+.budget-container {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    background-color: #fefefe;
+  }
+  
+  .budget-container h2 {
+    margin-top: 0;
+  }
+  
+  .line-items-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .line-item-row {
+    display: flex;
+    justify-content: start;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
+  .line-item-row div {
+    flex: 1;
+    text-align: left;
+    padding: 0 5px;
+  }
+  
+  .line-item-row div:last-child {
+    text-align: right;
+  }
+
+  .budget-container {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    background-color: #fefefe;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .budget-container:hover {
+    background-color: #f2f2f2;
+  }
+  
+  .budget-container.selected {
+    background-color: #d6eaff;
+    border-color: #007bff;
+  }
+  

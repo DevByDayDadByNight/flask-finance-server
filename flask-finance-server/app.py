@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from comparison import compare_and_update_google_sheet
 from datetime import datetime
-from models import Transaction
+from models import Transaction, Category
 from db_creator import db
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 import os
@@ -12,11 +12,14 @@ from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError as SQLAlchemyIntegrityError
 from mysql.connector.errors import IntegrityError as MySQLIntegrityError
 from sqlalchemy.dialects.mysql import insert  # Import MySQL-specific insert
+from category_routes import category_bp
+from budget_routes import budget_bp
+from line_item_routes import line_item_bp
 
 
-import logging
-logging.basicConfig()
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+# import logging
+# logging.basicConfig()
+# logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 
 
@@ -25,6 +28,10 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 with app.app_context():
     db.create_all()
     Migrate(app, db)
+    app.register_blueprint(category_bp)
+    app.register_blueprint(budget_bp)
+    app.register_blueprint(line_item_bp)
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -262,7 +269,3 @@ def upsert_transactions(transactions):
 def allowed_file(filename):
     """Check if the uploaded file is a valid CSV file."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -1,0 +1,36 @@
+/* TransactionList.css */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th,
+  td {
+    padding: 8px;
+    text-align: left;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  tr:nth-child(odd) {
+    background-color: #ffffff;
+  }
+  
+  button {
+    padding: 5px 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 3px;
+    background-color: #f5f5f5;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  button:hover {
+    opacity: 0.8;
+    background-color: #e53935;
+    color: #ffffff;
+  }
+  
