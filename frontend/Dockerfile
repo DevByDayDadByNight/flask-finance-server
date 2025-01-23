@@ -1,5 +1,5 @@
-# Use Node.js to build the React app
-FROM node:18 AS build
+# Use Node.js for development
+FROM node:18 AS development
 
 # Set the working directory
 WORKDIR /app
@@ -8,16 +8,15 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install
 
+# Pass the REACT_APP_API_URL build argument
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=${REACT_APP_API_URL}
 
-# Copy the rest of the app and build
+# Copy the rest of the app
 COPY . .
-RUN npm run build
 
-# Use Nginx to serve the built React app
-FROM nginx:latest AS production
-COPY --from=build /app/build /usr/share/nginx/html
+# Expose React development server port
+EXPOSE 3000
 
-# Expose Nginx port
-EXPOSE 80
+# Start the React development server
+CMD ["npm", "start"]

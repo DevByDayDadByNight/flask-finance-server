@@ -3,6 +3,7 @@ import { getTransactions,getBudgets, getLineItemsByBudgetId } from "../api";
 import TransactionList from "./TransactionList"; // Reuse the TransactionList component
 import "./BudgetList.css"; // Ensure this CSS file is included
 import { Link } from "react-router-dom";
+import { formatDate } from "../utils";
 
 const BudgetList = () => {
   const [budgets, setBudgets] = useState([]);
@@ -13,16 +14,11 @@ const BudgetList = () => {
   const [error, setError] = useState("");
   const [totals, setTotals] = useState({});
 
-  const formatDate = (date) => {
-    const d = new Date(date);
-    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-  };
-
-  const fetchTransactions = async (startDate, endDate) => {
+  const fetchTransactions = async (startDate, endDate, budget) => {
     try {
       const response = await getTransactions(startDate, endDate);
       setTransactions(response.data);
-      calculateTotals(response.data, lineItems[selectedBudget.id]);
+      calculateTotals(response.data, lineItems[budget.id]);
       setError("");
     } catch (err) {
       setError("Failed to fetch transactions");
@@ -30,35 +26,46 @@ const BudgetList = () => {
   };
 
   const calculateTotals = (transactions, lineItems) => {
-
-    const varActTotal = calculateTotalForAType("Variable", transactions, lineItems);
-    const notRecordedTotal = calculateTotalForAType("NotCounted", transactions, lineItems);
+    console.log("hereeee")
+    const varActMap = calculateTotalForAType("Variable", transactions, lineItems);
+    console.log("done")
+    console.log(varActMap)
+    const varActTotal =Object.values(varActMap).reduce((sum, value) => sum + value, 0);
+    const notRecordedMap = calculateTotalForAType("NotCounted", transactions, lineItems);
     const incomeTotal = lineItems.filter((x) => x.type === "Income").reduce((sum, item) => sum + item.amount, 0);
     const fixedTotal = lineItems.filter((x) => x.type === "Fixed").reduce((sum, item) => sum + item.amount, 0);
     const varTotal = lineItems.filter((x) => x.type === "Variable").reduce((sum, item) => sum + item.amount, 0);
     const budTot = incomeTotal - fixedTotal - varTotal
-    const budAct = incomeTotal - fixedTotal - varActTotal
+    const budAct = incomeTotal - fixedTotal - (varActTotal * -1)
 
 
     console.log(`income: ${incomeTotal}`)
     console.log(`fixed: ${fixedTotal}`)
-    console.log(`var: ${varTotal}`)
     console.log(`budT: ${budTot}`)
     console.log(`budAct: ${budAct}`)
 
     setTotals({
       budgetTotal: budTot,
-      budgetActual: budAct
+      budgetActual: budAct,
+      catTotal: varActMap
     })
 
   };
+
+  const txnUpdated = (txn) => {
+    const newTxns = transactions.map((tx) =>
+      tx.id === txn.id ? txn : tx
+    )
+    setTransactions(newTxns);
+    calculateTotals(newTxns, lineItems[selectedBudget.id])
+  }
 
   function calculateTotalForAType(type, transactions, lineItems) {
     // Step 1: Filter line items by the specified type and create a map of category mappings
     const categoryMap = lineItems
       .filter((item) => item.type === type)
       .reduce((acc, item) => {
-        acc[item.name.toLowerCase()] = item.relatedCategories.map((cat) =>
+        acc[item.name.toLowerCase()] = item.related_categories.map((cat) =>
           cat.toLowerCase()
         );
         return acc;
@@ -131,7 +138,7 @@ const BudgetList = () => {
             }`}
             onClick={() => {
                   setSelectedBudget(budget)
-                  fetchTransactions(formatDate(budget.start_date),formatDate(budget.end_date))
+                  fetchTransactions(formatDate(budget.start_date),formatDate(budget.end_date), budget)
               }
             }
           >
@@ -170,7 +177,11 @@ const BudgetList = () => {
                 <tr>
                   <td>{item.name}</td>
                   <td>{item.amount}</td>
-                  <td>{item.amount}</td>
+                  <td>{
+                  
+                    totals.catTotal ? totals.catTotal[item.name] : item.amount
+                    
+                    }</td>
                 </tr>
                ))}
              </tbody>
@@ -182,6 +193,7 @@ const BudgetList = () => {
   
             <TransactionList
             txns={transactions}
+            onUpdated={(txn) => txnUpdated(txn)}
           />
           
         </div>

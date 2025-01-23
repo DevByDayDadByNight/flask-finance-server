@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createBudget, updateBudget, createLineItem, updateLineItem, getLineItemsByBudgetId } from "../api"; // Import API functions
+import { formatDate } from "../utils";
 
 
 const BudgetCreator = ({ existingBudget }) => {
@@ -25,7 +26,14 @@ const BudgetCreator = ({ existingBudget }) => {
         const fetchLineItems = async () => {
           try {
             const response = await getLineItemsByBudgetId(existingBudget.id);
-            setLineItems(response.data);
+            const moved = response.data
+            const updatedMoved = moved.map(item => ({
+              ...item, // Keep all other properties of the item
+              related_categories: Array.isArray(item.related_categories)
+                ? item.related_categories.join(", ")
+                : item.related_categories // Ensure it's unchanged if not an array
+            }));
+            setLineItems(updatedMoved);
           } catch (error) {
             console.error("Error fetching line items:", error);
           }
@@ -73,13 +81,17 @@ const BudgetCreator = ({ existingBudget }) => {
         }
   
         for (const item of lineItems) {
+          const cat = item.related_categories && typeof item.related_categories === "string"
+          ? item.related_categories.split(",").map((c) => c.trim())
+          : item.related_categories
           if (item.id) {
+           
             await updateLineItem(item.id, {
               budget_id: budgetId,
               name: item.name,
               amount: parseFloat(item.amount),
               type: item.type,
-              related_categories: item.related_categories.split(",").map((c) => c.trim()),
+              related_categories: cat,
             });
           } else {
             await createLineItem({
@@ -87,7 +99,7 @@ const BudgetCreator = ({ existingBudget }) => {
               name: item.name,
               amount: parseFloat(item.amount),
               type: item.type,
-              related_categories: item.related_categories.split(",").map((c) => c.trim()),
+              related_categories: cat,
             });
           }
         }
@@ -123,7 +135,7 @@ const BudgetCreator = ({ existingBudget }) => {
             <input
               type="date"
               name="startDate"
-              value={budget.startDate}
+              value={formatDate(budget.startDate)}
               onChange={(e) => setBudget({ ...budget, startDate: e.target.value })}
             />
           </label>
@@ -134,7 +146,7 @@ const BudgetCreator = ({ existingBudget }) => {
             <input
               type="date"
               name="endDate"
-              value={budget.endDate}
+              value={formatDate(budget.endDate)}
               onChange={(e) => setBudget({ ...budget, endDate: e.target.value })}
             />
           </label>
@@ -168,9 +180,9 @@ const BudgetCreator = ({ existingBudget }) => {
             <input
               type="text"
               placeholder="Related Categories (comma-separated)"
-              value={item.related_categories}
+              value={item.related_categories || ""}
               onChange={(e) =>
-                handleLineItemChange(index, "relatedCategories", e.target.value)
+                handleLineItemChange(index, "related_categories", e.target.value)
               }
             />
             <button onClick={() => deleteLineItem(index)}>Delete</button>

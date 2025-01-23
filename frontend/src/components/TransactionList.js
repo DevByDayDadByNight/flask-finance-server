@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getCategories, updateTransaction, deleteTransaction } from "../api";
 
-const TransactionList = ({ txns }) => {
-  console.log(txns);
+const TransactionList = ({ txns, onUpdated }) => {
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
@@ -27,11 +26,10 @@ const TransactionList = ({ txns }) => {
   const handleCategoryChange = async (transactionId, newCategory) => {
     try {
       await updateTransaction(transactionId, { category: newCategory });
-      setTransactions((prev) =>
-        prev.map((txn) =>
-          txn.id === transactionId ? { ...txn, category: newCategory } : txn
-        )
-      );
+      
+      const txn = transactions.find(item => item.id === transactionId);
+      const newTxn = { ...txn, category: newCategory }
+      onUpdated(newTxn)
     } catch (err) {
       console.error("Failed to update transaction category:", err);
     }
