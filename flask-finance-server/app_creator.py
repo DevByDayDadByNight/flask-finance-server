@@ -1,7 +1,7 @@
 from flask_cors import CORS
 import os
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask_jwt_extended import JWTManager
+from flask import Flask
 from datetime import timedelta
 
 app = Flask(__name__)

@@ -59,7 +59,7 @@ export const deleteBudget = (id) =>
 export const getLineItems = () => API.get("/line_items");
 
 export const getLineItemsByBudgetId = (budgetId) =>
-  API.get(`/line_items?budget_id=${budgetId}`);
+  API.get(`/line_items/${budgetId}`);
 
 export const createLineItem = (lineItem) =>
   API.post("/line_items", lineItem);

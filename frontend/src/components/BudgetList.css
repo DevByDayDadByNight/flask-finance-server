@@ -1,58 +1,55 @@
 /* Styles for the BudgetList component */
 
+/* Container for all budget cards */
+.budget-list {
+  display: flex; /* Enable flexbox layout */
+  flex-wrap: wrap; /* Allow wrapping to the next row if there are too many cards */
+  gap: 20px; /* Add space between cards */
+  justify-content: flex-start; /* Align cards to the left */
+}
+
+/* Individual budget card */
 .budget-container {
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    background-color: #fefefe;
-  }
-  
-  .budget-container h2 {
-    margin-top: 0;
-  }
-  
-  .line-items-column {
-    display: flex;
-    flex-direction: column;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fefefe;
+  padding: 15px;
+  width: 250px; /* Fixed width for cards */
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for card effect */
+}
+
+.budget-container h2 {
+  margin-top: 0;
+  font-size: 1.2em;
+}
+
+.budget-container p {
+  margin: 5px 0;
+  font-size: 0.9em;
+  color: #555;
+}
+
+.budget-container:hover {
+  background-color: #f2f2f2;
+  transform: translateY(-5px); /* Lift the card slightly on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a stronger shadow on hover */
+}
+
+.budget-container.selected {
+  background-color: #d6eaff;
+  border-color: #007bff;
+}
+
+/* For smaller screens, make sure cards adjust properly */
+@media (max-width: 768px) {
+  .budget-list {
+    flex-direction: column; /* Stack cards vertically */
     gap: 10px;
-  }
-  
-  .line-item-row {
-    display: flex;
-    justify-content: start;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
-  }
-  
-  .line-item-row div {
-    flex: 1;
-    text-align: left;
-    padding: 0 5px;
-  }
-  
-  .line-item-row div:last-child {
-    text-align: right;
   }
 
   .budget-container {
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    background-color: #fefefe;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    width: 100%; /* Make cards full-width on small screens */
   }
-  
-  .budget-container:hover {
-    background-color: #f2f2f2;
-  }
-  
-  .budget-container.selected {
-    background-color: #d6eaff;
-    border-color: #007bff;
-  }
-  
+}

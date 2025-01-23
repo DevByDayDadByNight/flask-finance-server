@@ -4,9 +4,21 @@ from models import Budget, LineItem
 
 line_item_bp = Blueprint('line_item', __name__)
 
-@line_item_bp.route('/line_items', methods=['GET'])
+@line_item_bp.route('/line_items/<int:budget_id>', methods=['GET'])
+def get_line_items_by_budget_id(budget_id):
+    line_items = LineItem.query.filter_by(budget_id=budget_id).all()
+    return jsonify([{
+        'id': item.id,
+        'budget_id': item.budget_id,
+        'amount': item.amount,
+        'name': item.name,
+        'type': item.type,
+        'related_categories': item.related_categories
+    } for item in line_items])
+
+@line_item_bp.route('/line_items/<int:id>', methods=['GET'])
 def get_line_items():
-    line_items = LineItem.query.all()
+    line_items = LineItem.query
     return jsonify([{
         'id': item.id,
         'budget_id': item.budget_id,

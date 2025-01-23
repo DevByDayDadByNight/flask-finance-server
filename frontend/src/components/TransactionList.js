@@ -8,7 +8,20 @@ const TransactionList = ({ txns, onUpdated }) => {
 
 
   useEffect(() => {
-    setTransactions(txns);
+    // Sort transactions by postDate (ascending) and then by description (alphabetically)
+    const sortedTxns = [...txns].sort((a, b) => {
+      // Compare postDate first
+      const dateA = new Date(a.postDate);
+      const dateB = new Date(b.postDate);
+
+      if (dateA < dateB) return -1;
+      if (dateA > dateB) return 1;
+
+      // If postDate is the same, compare description (case-insensitive)
+      return a.description.localeCompare(b.description, undefined, { sensitivity: "base" });
+    });
+
+    setTransactions(sortedTxns);
   }, [txns]);
 
 
@@ -58,6 +71,7 @@ const TransactionList = ({ txns, onUpdated }) => {
       <table className="transaction-table">
   <thead>
     <tr>
+      <th>Post Date</th>
       <th>Description</th>
       <th>Amount</th>
       <th>Category</th>
@@ -67,6 +81,7 @@ const TransactionList = ({ txns, onUpdated }) => {
   <tbody>
     {transactions.map((txn, index) => (
       <tr key={txn.id}>
+        <td>{txn.postDate}</td>
         <td>{txn.description}</td>
         <td>${txn.amount.toFixed(2)}</td>
         <td>

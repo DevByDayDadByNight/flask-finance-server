@@ -129,7 +129,7 @@ const BudgetList = () => {
   return (
     <div>
       <h1>Budgets</h1>
-      <div>
+      <div className="budget-list">
         {budgets.map((budget) => (
           <div
             key={budget.id}
