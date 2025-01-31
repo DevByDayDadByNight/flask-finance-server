@@ -24,11 +24,11 @@ from blueprints.upload_routes import uploads_bp
 with app.app_context():
     db.create_all()
     Migrate(app, db)
-    app.register_blueprint(category_bp)
-    app.register_blueprint(budget_bp)
-    app.register_blueprint(line_item_bp)
-    app.register_blueprint(transactions_bp)
-    app.register_blueprint(uploads_bp)
+    app.register_blueprint(category_bp, url_prefix="/api")
+    app.register_blueprint(budget_bp, url_prefix="/api")
+    app.register_blueprint(line_item_bp, url_prefix="/api")
+    app.register_blueprint(transactions_bp, url_prefix="/api")
+    app.register_blueprint(uploads_bp, url_prefix="/api")
 
 
 @app.route('/login', methods=['POST'])
