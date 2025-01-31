@@ -1,21 +1,28 @@
 version: '3.7'
 
 services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"  # Expose Nginx on port 80
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf  # Custom Nginx configuration
+      - /etc/letsencrypt/live/homelab.servequake.com:/etc/nginx/certs:ro  # Mount certificates
+    depends_on:
+      - flask_app
+      - react_frontend
+    networks:
+      - app-network
   flask_app:
     build:
       context: ./flask-finance-server
     ports:
       - "5000:5000"
     environment:
-      FLASK_ENV: development
-      FLASK_DEBUG: 1  # Explicitly enable debug mode
-      PYTHONUNBUFFERED: 1
       MYSQL_DATABASE: bookkeeper_db
       MYSQL_USER: bookkeeper_user
       MYSQL_PASSWORD: bookkeeper_user_sql_password_for_a_long_time
       MYSQL_HOST: mysql
-      FLASK_APP: app.py
-      FLASK_RUN_HOST: 0.0.0.0
     restart: always
     volumes:
       - ./migrations:/app/migrations  # Persist migrations
@@ -23,6 +30,23 @@ services:
     command: flask run  # Starts the app using Flask CLI
     depends_on:
       - mysql
+    networks:
+      - app-network
+
+  react_frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_API_URL: "http://127.0.0.1:5000"
+    volumes:
+      - ./frontend:/app  # Mount the local source code to the container
+      - /app/node_modules  # Prevent overwriting node_modules
+    ports:
+      - "3000:3000"  # React development server runs on port 3000
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # Optional: Ensures file watching works in Docker
+    networks:
+      - app-network
 
   mysql:
     image: mysql:5.7
@@ -37,6 +61,8 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
   
   # react-frontend:
   #   build:
@@ -46,3 +72,7 @@ services:
     # command: ["nginx", "-g", "daemon off;"]  # Start Nginx
 volumes:
   mysql_data:
+
+networks:
+  app-network:
+    driver: bridge

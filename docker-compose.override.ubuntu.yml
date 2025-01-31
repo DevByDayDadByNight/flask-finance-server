@@ -1,11 +1,25 @@
 version: '3.7'
 
 services:
+  flask_app:
+    environment:
+      FLASK_ENV: production
+      FLASK_DEBUG: 0
+      FLASK_RUN_HOST: 0.0.0.0
+    volumes:
+      - ./migrations:/app/migrations  # Persist migrations
+    command: gunicorn -w 4 -b 0.0.0.0:5000 app:app  # Use Gunicorn for production
+    networks:
+      - app-network
   mysql:
     image: mysql:5.7
+    networks:
+      - app-network
   
-  react-frontend:
+  react_frontend:
     build:
       context: ./frontend
       args:
         REACT_APP_API_URL: "https://homelab.servequake.com/"
+    networks:
+      - app-network
