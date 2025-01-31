@@ -16,10 +16,3 @@ services:
     networks:
       - app-network
   
-  react_frontend:
-    build:
-      context: ./frontend
-      args:
-        REACT_APP_API_URL: "https://homelab.servequake.com/"
-    networks:
-      - app-network

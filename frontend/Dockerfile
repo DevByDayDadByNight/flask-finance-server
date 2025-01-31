@@ -8,15 +8,15 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install
 
+
+
 # Pass the REACT_APP_API_URL build argument
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=${REACT_APP_API_URL}
+
 
 # Copy the rest of the app
 COPY . .
 
 # Expose React development server port
 EXPOSE 3000
-
-# Start the React development server
-CMD ["npm", "start"]
