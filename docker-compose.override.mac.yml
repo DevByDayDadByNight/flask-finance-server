@@ -17,7 +17,7 @@ services:
     volumes:
       - ./flask-finance-server:/app  # Map source code for hot-reloading
       - ./migrations:/app/migrations
-    command: flask run  # Enable development server
+    command: flask run  # Enable development server df
     networks:
       - app-network
   mysql:
