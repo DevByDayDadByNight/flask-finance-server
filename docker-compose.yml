@@ -7,7 +7,7 @@ services:
       - "80:80"  # Expose Nginx on port 443
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf  # Custom Nginx configuration
-      - /etc/letsencrypt/live/homelab.servequake.com:/etc/nginx/certs:ro  # Mount certificates
+      - /etc/letsencrypt/archive/homelab.servequake.com:/etc/nginx/certs:ro  # Mount actual certificate files
       - react_build:/usr/share/nginx/html  # Use the shared volume for React build files
     depends_on:
       - flask_app
