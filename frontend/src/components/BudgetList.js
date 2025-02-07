@@ -191,7 +191,8 @@ const BudgetList = () => {
                   <td></td>
                   <td>{
 
-                    totals.catTotal[item.name] ? totals.catTotal[item.name] : item.amount
+                  totals.catTotal?.[item.name] ?? item.amount
+
 
                   }</td>
                   
