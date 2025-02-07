@@ -29,7 +29,7 @@ services:
     build:
       context: ./frontend
       args:
-        REACT_APP_API_URL: "http://127.0.0.1:5000/api/"
+        REACT_APP_API_URL: "http://127.0.0.1:5000/"
     volumes:
       - ./frontend:/app  # Mount the local source code to the container
       - /app/node_modules  # Prevent overwriting node_modules
