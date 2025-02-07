@@ -42,6 +42,8 @@ const BudgetList = () => {
 
     const budAct = incomeTotal - fixedTotal - (varActTotal * -1)
 
+    const mergedMap = { ...varActMap, ...notRecordedMap };
+    console.log("mergedMap", mergedMap)
 
     console.log(`income: ${incomeTotal}`)
     console.log(`fixed: ${fixedTotal}`)
@@ -51,7 +53,7 @@ const BudgetList = () => {
     setTotals({
       budgetTotal: budTot,
       budgetActual: budAct,
-      catTotal: varActMap
+      catTotal: mergedMap
     })
 
   };
