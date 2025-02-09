@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { createBudget, updateBudget, createLineItem, updateLineItem, getLineItemsByBudgetId } from "../api"; // Import API functions
 import { formatDate } from "../utils";
 
 
 const BudgetCreator = ({ existingBudget }) => {
+    const navigate = useNavigate();
     const [budget, setBudget] = useState({
       name: "",
       startDate: "",
@@ -104,7 +106,7 @@ const BudgetCreator = ({ existingBudget }) => {
           }
         }
   
-        alert("Budget and line items saved successfully!");
+        navigate("/budgets");
         if (!existingBudget) {
           setBudget({ name: "", startDate: "", endDate: "" });
           setLineItems([]);

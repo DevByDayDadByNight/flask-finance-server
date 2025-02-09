@@ -2,17 +2,17 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import Login from "./components/Login";
-import TransactionList from "./components/TransactionList";
 import UploadCSV from "./components/UploadCSV";
-import UpdateTransaction from "./components/UpdateTransaction";
-import LogoutButton from "./components/LogoutButton";
 import CategoriesPage from "./components/CategoriesPage"; // Adjust the path as needed
 import BudgetCreator from "./components/BudgetCreator"; // Import BudgetCreator
 import BudgetList from "./components/BudgetList"; // Import BudgetList
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Navbar, Nav, Container, Button } from "react-bootstrap";
+
+
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
-  const [transactionToEdit, setTransactionToEdit] = useState(null);
 
   if (!isLoggedIn) {
     return <Login setIsLoggedIn={setIsLoggedIn} />;
@@ -21,36 +21,43 @@ const App = () => {
   return (
     <Router>
       <div>
-        <h1>React-Flask App</h1>
-        <LogoutButton setIsLoggedIn={setIsLoggedIn} />
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Upload Transactions</Link>
-            </li>
-            <li>
-              <Link to="/categories">Categories</Link>
-            </li>
-            <li>
-              <Link to="/budgets">Budgets</Link>
-            </li>
-            <li>
-              <Link to="/create-budget">Create Budget</Link>
-            </li>
-          </ul>
-        </nav>
+      <Navbar bg="dark" variant="dark" expand="lg">
+      <Container>
+        {/* Brand / Logo */}
+        <Navbar.Brand as={Link} to="/">
+          Budget Tracker
+        </Navbar.Brand>
+
+        {/* Toggle button for mobile view */}
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className="me-auto">
+            <Nav.Link as={Link} to="/">Budgets</Nav.Link>
+            <Nav.Link as={Link} to="/categories">Categories</Nav.Link>
+            <Nav.Link as={Link} to="/upload">Upload</Nav.Link>
+            <Nav.Link as={Link} to="/create-budget">Create Budget</Nav.Link>
+          </Nav>
+
+          {/* Logout Button */}
+          <Button variant="outline-light" onClick={() => setIsLoggedIn(false)}>
+            Logout
+          </Button>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
         <Routes>
           {/* Default route for transactions */}
           <Route
             path="/"
             element={
-                  <UploadCSV />
+                  <BudgetList />
             }
           />
           {/* Route for categories */}
           <Route path="/categories" element={<CategoriesPage />} />
           {/* Route for listing budgets */}
-          <Route path="/budgets" element={<BudgetList />} />
+          <Route path="/upload" element={<UploadCSV />} />
           {/* Route for creating or editing budgets */}
           <Route path="/create-budget" element={<BudgetCreatorWrapper />} />
         </Routes>
