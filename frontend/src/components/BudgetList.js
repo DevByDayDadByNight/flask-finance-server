@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getTransactions, getBudgets, getLineItemsByBudgetId } from "../api";
+import { getTransactions, getBudgets, getLineItemsByBudgetId, deleteBudget } from "../api";
 import TransactionList from "./TransactionList"; // Reuse the TransactionList component
 import BudgetTotals from "./BudgetTotals";
 import TransactionFilter from "./TransactionFilter";
@@ -31,6 +31,18 @@ const BudgetList = () => {
       tx.id === txn.id ? txn : tx
     )
     setTransactions(newTxns);
+  }
+
+  const deleteBudgetById = async (budgetId) => {
+    try {
+      await deleteBudget(budgetId);
+      setBudgets(budgets.filter(b => b.id !== budgetId));
+      setSelectedBudget(null);
+      setTransactions([]);
+    } catch (error) {
+      console.error("Error deleting budget:", error);
+      alert("Failed to delete budget. Please try again.");
+    }
   }
 
   useEffect(() => {
@@ -94,6 +106,8 @@ const BudgetList = () => {
             <Link to="/create-budget" state={{ budget }} className="edit-link">
               Edit Budget
             </Link>
+
+            <button className="delete-button" onClick={() => deleteBudgetById(budget.id)}>Delete</button>
           </div>
         ))}
       </div>
