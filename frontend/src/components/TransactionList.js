@@ -8,6 +8,8 @@ const TransactionList = ({ txns, onUpdated }) => {
 
 
   useEffect(() => {
+    console.log("hit start")
+    console.log(txns);
     // Sort transactions by postDate (ascending) and then by description (alphabetically)
     const sortedTxns = [...txns].sort((a, b) => {
       // Compare postDate first

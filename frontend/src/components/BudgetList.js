@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getTransactions, getBudgets, getLineItemsByBudgetId } from "../api";
 import TransactionList from "./TransactionList"; // Reuse the TransactionList component
 import BudgetTotals from "./BudgetTotals";
+import TransactionFilter from "./TransactionFilter";
 import "./BudgetList.css"; // Ensure this CSS file is included
 import { Link } from "react-router-dom";
 import { formatDate } from "../utils";
@@ -13,7 +14,7 @@ const BudgetList = () => {
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
   const [error, setError] = useState("");
-  const [totals, setTotals] = useState({});
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   const fetchTransactions = async (startDate, endDate, budget) => {
     try {
@@ -106,8 +107,15 @@ const BudgetList = () => {
             selectedBudget={selectedBudget}
             />
 
+          <TransactionFilter
+            transactions={transactions}
+            selectedCategories={selectedCategories}
+            onChange={(cats) => setSelectedCategories(cats)}
+            />
+          
+
           <TransactionList
-            txns={transactions}
+            txns={transactions.filter(txn => selectedCategories.length === 0 || selectedCategories.includes(txn.category))}
             onUpdated={(txn) => txnUpdated(txn)}
           />
 
