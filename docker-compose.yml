@@ -44,7 +44,6 @@ services:
       - react_build:/app/build  # Store build artifacts in a shared Docker volume
     ports:
       - "3000:3000"  # React development server runs on port 3000    
-    command: npm run build
     networks:
       - app-network
 
