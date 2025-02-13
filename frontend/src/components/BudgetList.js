@@ -35,6 +35,7 @@ const BudgetList = () => {
 
   useEffect(() => {
     const fetchBudgets = async () => {
+      console.log("Fetching budgets...");
       try {
         const budgetResponse = await getBudgets();
         setBudgets(budgetResponse.data);
