@@ -107,7 +107,7 @@ const BudgetList = () => {
               Edit Budget
             </Link>
 
-            <button className="delete-button" onClick={() => deleteBudgetById(budget.id)}>Delete</button>
+            <button className="delete-button" style={{ margin: "5px" }} onClick={() => deleteBudgetById(budget.id)}>Delete</button>
           </div>
         ))}
       </div>
