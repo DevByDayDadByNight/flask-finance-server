@@ -20,6 +20,7 @@ COPY . .
 
 # Remove the old build folder before building
 RUN rm -rf build
+RUN npm run build
 
 # Expose React development server port
 EXPOSE 3000
