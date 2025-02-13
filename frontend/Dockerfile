@@ -19,7 +19,7 @@ ENV REACT_APP_API_URL=${REACT_APP_API_URL}
 COPY . .
 
 # Remove the old build folder before building
-RUN rm -rf build && npm run build
+RUN rm -rf build
 
 # Expose React development server port
 EXPOSE 3000
