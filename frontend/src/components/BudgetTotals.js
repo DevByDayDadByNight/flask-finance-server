@@ -99,12 +99,13 @@ const BudgetTotals = ({ txns, lineItems, selectedBudget }) => {
             const daysRemaining = daysPassed(new Date(), new Date(budget.end_date)) * -1;
             
             const dailySpend = spendActual / daysPassedSince;
-            const projectedRemaining = dailySpend * daysRemaining;
-            const projectedTotal = spendActual + projectedRemaining;
+            const projectedRemaining = (spendBudgeted - dailySpend * daysRemaining);
+            const projectedTotal = dailySpend * (daysPassedSince + daysRemaining);
 
             return (
                 <div>
                     <p>{daysPassedSince}/{daysRemaining}</p>
+                    <p>Budgeted Daily Spend: {spendBudgeted / (daysPassedSince + daysRemaining)}</p>
                     <p>Daily Spend: {dailySpend}</p>
                     <p>Projected Remaining: {projectedRemaining}</p>
                     <p>Projected Total: {projectedTotal}</p>
