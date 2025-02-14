@@ -106,11 +106,8 @@ const BudgetCreator = ({ existingBudget }) => {
           }
         }
   
-        navigate("/budgets");
-        if (!existingBudget) {
-          setBudget({ name: "", startDate: "", endDate: "" });
-          setLineItems([]);
-        }
+        navigate("/");
+
       } catch (error) {
         console.error("Error saving budget:", error);
         alert("Failed to save the budget and line items. Please try again.");

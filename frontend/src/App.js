@@ -8,6 +8,7 @@ import BudgetCreator from "./components/BudgetCreator"; // Import BudgetCreator
 import BudgetList from "./components/BudgetList"; // Import BudgetList
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import TransactionSearch from "./components/TransactionSearch";
 
 
 
@@ -37,6 +38,7 @@ const App = () => {
             <Nav.Link as={Link} to="/categories">Categories</Nav.Link>
             <Nav.Link as={Link} to="/upload">Upload</Nav.Link>
             <Nav.Link as={Link} to="/create-budget">Create Budget</Nav.Link>
+            <Nav.Link as={Link} to="/transactions">Transactions</Nav.Link>
           </Nav>
 
           {/* Logout Button */}
@@ -60,6 +62,8 @@ const App = () => {
           <Route path="/upload" element={<UploadCSV />} />
           {/* Route for creating or editing budgets */}
           <Route path="/create-budget" element={<BudgetCreatorWrapper />} />
+          {/* Route for transactions */}
+          <Route path="/transactions" element={<TransactionSearch />} />
         </Routes>
       </div>
     </Router>

@@ -31,7 +31,6 @@ const TransactionFilter = ({ transactions, selectedCategories, onChange }) => {
     return (
         <div className="transaction-filter">
             <p>Available Categories:</p>
-            // use flex row
             <div style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
                 {
                     availableCategories.map((cat) => {
