@@ -69,6 +69,10 @@ export default function TransactionSearch() {
                 </label>
             </div>
 
+            <p><b>Total: {
+                transactions.filter((txn) => selectedCategories.length === 0 || selectedCategories.includes(txn.category || "")).reduce((acc, txn) => acc + txn.amount, 0)
+                }</b></p>
+
             <TransactionFilter
                 transactions={transactions}
                 selectedCategories={selectedCategories}

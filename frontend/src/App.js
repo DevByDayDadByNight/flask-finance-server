@@ -42,7 +42,10 @@ const App = () => {
           </Nav>
 
           {/* Logout Button */}
-          <Button variant="outline-light" onClick={() => setIsLoggedIn(false)}>
+          <Button variant="outline-light" onClick={() => {
+            setIsLoggedIn(false);
+            localStorage.removeItem("token");
+          }}>
             Logout
           </Button>
         </Navbar.Collapse>
