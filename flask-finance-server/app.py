@@ -13,9 +13,9 @@ from blueprints.transaction_routes import transactions_bp
 from blueprints.upload_routes import uploads_bp
 
 
-# import logging
-# logging.basicConfig()
-# logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+import logging
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 
 

@@ -50,8 +50,8 @@ def upload_file():
                 post_date=datetime.strptime(row["Post Date"], "%m/%d/%Y").date(),
                 description=row["Description"],
                 amount=row["Amount"],
-                category="",
-                account=row.get("Account", "")
+                category=row["Category"],
+                account=str(row.get("Account", ""))
             )
             for _, row in df.iterrows()
         ]
@@ -61,10 +61,12 @@ def upload_file():
             "description": t.description,
             "amount": t.amount,
             "category": t.category,
-            "account": t.account
+            # insert t.account as string if it exists, else empty string
+            "account": "" if t.account == "nan" else t.account
         } for t in transactions]).prefix_with("IGNORE")
         with db.session.begin():
             db.session.execute(stmt)
         return jsonify({"message": "CSV uploaded successfully", "new_transactions_added": len(transactions)}), 200
     except Exception as e:
+        print(e)
         return jsonify({"error": f"Failed to process the CSV file: {str(e)}"}), 500
