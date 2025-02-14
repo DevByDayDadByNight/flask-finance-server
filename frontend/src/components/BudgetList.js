@@ -89,6 +89,8 @@ const BudgetList = () => {
               }`}
             onClick={() => {
               setSelectedBudget(budget)
+              setSelectedCategories([])
+              setTransactions([])
               fetchTransactions(formatDate(budget.start_date), formatDate(budget.end_date), budget)
             }
             }
