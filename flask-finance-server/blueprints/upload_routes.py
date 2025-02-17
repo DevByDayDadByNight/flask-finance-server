@@ -50,7 +50,7 @@ def upload_file():
                 post_date=datetime.strptime(row["Post Date"], "%m/%d/%Y").date(),
                 description=row["Description"],
                 amount=row["Amount"],
-                category=row["Category"],
+                category="",
                 account=str(row.get("Account", ""))
             )
             for _, row in df.iterrows()
