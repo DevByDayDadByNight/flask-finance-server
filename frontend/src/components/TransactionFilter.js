@@ -47,7 +47,7 @@ const TransactionFilter = ({ transactions, selectedCategories, onChange }) => {
 
             </div>
 
-            <button onClick={() => {
+            <button style={{marginRight: "5px"}}onClick={() => {
                 onChange([])
             }}>Clear</button>
 

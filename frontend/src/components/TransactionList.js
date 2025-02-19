@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getCategories, updateTransaction, deleteTransaction } from "../api";
+import "./TransactionList.css";
 
 const TransactionList = ({ txns, onUpdated }) => {
   const [transactions, setTransactions] = useState([]);
@@ -8,7 +9,6 @@ const TransactionList = ({ txns, onUpdated }) => {
 
 
   useEffect(() => {
-    console.log("hit start")
     console.log(txns);
     // Sort transactions by postDate (ascending) and then by description (alphabetically)
     const sortedTxns = [...txns].sort((a, b) => {
@@ -41,7 +41,7 @@ const TransactionList = ({ txns, onUpdated }) => {
   const handleCategoryChange = async (transactionId, newCategory) => {
     try {
       await updateTransaction(transactionId, { category: newCategory });
-      
+
       const txn = transactions.find(item => item.id === transactionId);
       const newTxn = { ...txn, category: newCategory }
       onUpdated(newTxn)
@@ -71,43 +71,43 @@ const TransactionList = ({ txns, onUpdated }) => {
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       <table className="transaction-table">
-  <thead>
-    <tr>
-      <th>Post Date</th>
-      <th>Description</th>
-      <th>Amount</th>
-      <th>Category</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {transactions.map((txn, index) => (
-      <tr key={txn.id}>
-        <td>{txn.postDate}</td>
-        <td>{txn.description}</td>
-        <td>${txn.amount.toFixed(2)}</td>
-        <td>
-          <select
-            value={txn.category || ""}
-            onChange={(e) => handleCategoryChange(txn.id, e.target.value)}
-          >
-            <option value="" disabled>
-              Select a category
-            </option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.name}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </td>
-        <td>
-          <button onClick={() => handleDeleteTransaction(txn.id)}>Delete</button>
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+        <thead>
+          <tr>
+            <th>Post Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Category</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {transactions.map((txn, index) => (
+            <tr key={txn.id}>
+              <td>{txn.postDate}</td>
+              <td>{txn.description}</td>
+              <td>${txn.amount.toFixed(2)}</td>
+              <td>
+                <select
+                  value={txn.category || ""}
+                  onChange={(e) => handleCategoryChange(txn.id, e.target.value)}
+                >
+                  <option value="" disabled>
+                    Select a category
+                  </option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </td>
+              <td>
+                <button onClick={() => handleDeleteTransaction(txn.id)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
     </div>
   );

@@ -5,3 +5,7 @@ export const formatDate = (date) => {
   const day = String(d.getUTCDate()).padStart(2, "0"); // Add leading zero
   return `${year}-${month}-${day}`;
   };
+
+  export const formatMoney = (amount) => {
+    return `$${amount.toFixed(2)}`;
+  }
