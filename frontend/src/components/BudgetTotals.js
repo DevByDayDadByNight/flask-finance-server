@@ -128,7 +128,7 @@ const BudgetTotals = ({ txns, lineItems, selectedBudget }) => {
             <td>Budgeted</td>
             <td>{formatMoney(totals.budgetTotal ?? 0.0)}</td>
             <td>Actual</td>
-            <td>{formatMoney(totals.budgetActual)}</td>
+            <td>{formatMoney(totals.budgetActual ?? 0.0)}</td>
           </tr>
         </tbody>
       </table>
