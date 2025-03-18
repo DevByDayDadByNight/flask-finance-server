@@ -66,7 +66,7 @@ const TransactionList = ({ txns, onUpdated }) => {
   }, []);
 
   return (
-    <div>
+    <div style={{marginBottom: "30px"}}>
       <h2>Transactions</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
 
