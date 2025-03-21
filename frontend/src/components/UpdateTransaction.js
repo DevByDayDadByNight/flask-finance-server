@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { updateTransaction, getCategories } from "../api";
+import { updateTransaction, getCategories, createTransaction } from "../api";
+import { formatDate } from "../utils";
 
 const UpdateTransaction = ({ transaction, setTransactionToEdit }) => {
-  const [description, setDescription] = useState(transaction.description);
-  const [amount, setAmount] = useState(transaction.amount);
-  const [category, setCategory] = useState(transaction.category || "");
+  const [description, setDescription] = useState(transaction ? transaction.description : "");
+  const [amount, setAmount] = useState(transaction? transaction.amount : "");
+  const [category, setCategory] = useState(transaction ? transaction.category : "");
   const [categories, setCategories] = useState([]);
   const [message, setMessage] = useState("");
+  const [postDate, setPostDate] = useState(transaction ? transaction.post_date : "");
 
   useEffect(() => {
     // Fetch categories from the API
@@ -25,7 +27,12 @@ const UpdateTransaction = ({ transaction, setTransactionToEdit }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateTransaction(transaction.id, { description, amount, category });
+      if(transaction) {
+        await updateTransaction(transaction.id, { description, amount, category });
+      } else {
+        await createTransaction({description, amount, category, post_date: postDate});
+      }
+      
       setMessage("Transaction updated successfully");
       setTransactionToEdit(null);
     } catch (err) {
@@ -38,6 +45,18 @@ const UpdateTransaction = ({ transaction, setTransactionToEdit }) => {
     <div>
       <h2>Edit Transaction</h2>
       <form onSubmit={handleSubmit}>
+      <div>
+          <label htmlFor="date">Date</label>
+         <input
+            type="date"
+            name="Post Date"
+            value={postDate}
+            onChange={(e) => { 
+                const date = formatDate(e.target.value);
+                setPostDate(date);
+            }}
+         />
+        </div>
         <div>
           <label htmlFor="description">Description</label>
           <input

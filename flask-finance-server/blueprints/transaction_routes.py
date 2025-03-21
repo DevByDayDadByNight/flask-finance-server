@@ -61,6 +61,27 @@ def update_transaction(transaction_id):
     except Exception as e:
         return jsonify({"error": "Internal server error"}), 500
     
+
+@transactions_bp.route('/transaction', methods=['POST'])
+@jwt_required()
+def create_transaction():
+    try:
+        data = request.json
+        post_date1 = datetime.strptime(data["post_date"], "%Y-%m-%d") if "post_date" in data else None
+        new_transaction = Transaction(
+            transaction_date= post_date1,
+            post_date= post_date1,
+            description=data.get("description", ""),
+            amount=float(data.get("amount", 0.0)),
+            category=data.get("category", ""),
+            account=data.get("account", "")
+        )
+        db.session.add(new_transaction)
+        db.session.commit()
+        return jsonify({"message": "Transaction created successfully", "transaction_id": new_transaction.id}), 201
+    except Exception as e:
+        return jsonify({"error": f"Failed to add transaction: {str(e)}"}), 500
+    
     
 @transactions_bp.route('/transactions/<int:transaction_id>', methods=['DELETE'])
 @jwt_required()

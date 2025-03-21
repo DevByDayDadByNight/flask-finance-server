@@ -9,6 +9,7 @@ import BudgetList from "./components/BudgetList"; // Import BudgetList
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Navbar, Nav, Container, Button } from "react-bootstrap";
 import TransactionSearch from "./components/TransactionSearch";
+import UpdateTransaction from "./components/UpdateTransaction";
 
 
 
@@ -67,6 +68,9 @@ const App = () => {
           <Route path="/create-budget" element={<BudgetCreatorWrapper />} />
           {/* Route for transactions */}
           <Route path="/transactions" element={<TransactionSearch />} />
+          <Route path="/create-transaction" element={<UpdateTransaction 
+          txn={undefined}
+          setTransactionToEdit={() => {}}/>} />
         </Routes>
       </div>
     </Router>

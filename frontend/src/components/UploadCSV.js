@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { uploadCSV } from "../api";
 
 const UploadCSV = () => {
@@ -25,6 +26,9 @@ const UploadCSV = () => {
         <button type="submit">Upload</button>
       </form>
       {message && <p>{message}</p>}
+
+
+      <h4><Link to="/create-transaction">Create Transaction</Link></h4>
     </div>
   );
 };
