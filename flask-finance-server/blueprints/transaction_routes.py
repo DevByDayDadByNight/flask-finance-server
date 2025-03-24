@@ -36,7 +36,7 @@ def get_transactions():
     transactions = fetch_transactions(start_date=start_date, end_date=end_date)
     return jsonify(transactions)
 
-@transactions_bp.route('/update_transaction/<int:transaction_id>', methods=['PUT'])
+@transactions_bp.route('/transactions/<int:transaction_id>', methods=['PUT'])
 @jwt_required()
 def update_transaction(transaction_id):
     try:
@@ -62,7 +62,7 @@ def update_transaction(transaction_id):
         return jsonify({"error": "Internal server error"}), 500
     
 
-@transactions_bp.route('/transaction', methods=['POST'])
+@transactions_bp.route('/transactions', methods=['POST'])
 @jwt_required()
 def create_transaction():
     try:

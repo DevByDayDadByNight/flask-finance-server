@@ -33,10 +33,10 @@ export const uploadCSV = (file) => {
 };
 
 export const updateTransaction = (id, updatedFields) =>
-  API.put(`/transaction/${id}`, updatedFields);
+  API.put(`/transactions/${id}`, updatedFields);
 
 export const createTransaction = (updatedFields) =>
-  API.post(`/transaction`, updatedFields);
+  API.post(`/transactions`, updatedFields);
 
 // Categories
 export const getCategories = () => API.get("/categories");
