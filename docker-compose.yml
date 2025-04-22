@@ -4,11 +4,10 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - "443:443"  # Expose Nginx on port 443
+      - "80:80"  # Serve HTTP on local network
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf  # Custom Nginx configuration
-      - /etc/letsencrypt/archive/homelab.servequake.com:/etc/nginx/certs:ro  # Mount actual certificate files
-      - react_build:/usr/share/nginx/html  # Use the shared volume for React build files
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - react_build:/usr/share/nginx/html  # Serve built React app
     depends_on:
       - flask_app
       - react_frontend
