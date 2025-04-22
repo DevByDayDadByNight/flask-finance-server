@@ -37,7 +37,7 @@ services:
     build:
       context: ./frontend
       args:
-        REACT_APP_API_URL: "https://homelab.servequake.com/api/"
+        REACT_APP_API_URL: "http://192.168.86.33/api/"
     volumes:
       - ./frontend:/app  # Mount the local source code to the container
       - react_build:/app/build  # Store build artifacts in a shared Docker volume
