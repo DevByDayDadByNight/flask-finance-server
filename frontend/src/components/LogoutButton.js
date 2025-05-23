@@ -3,7 +3,8 @@ import React from "react";
 const LogoutButton = ({ setIsLoggedIn }) => {
   const handleLogout = async () => {
     try {
-      await localStorage.removeItem("token"); // Notify the backend (optional)
+      await localStorage.removeItem("token");
+      await localStorage.removeItem("refreshToken");
     } catch (error) {
       console.error("Error logging out:", error);
     } finally {

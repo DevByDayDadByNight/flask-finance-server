@@ -11,6 +11,7 @@ const Login = ({ setIsLoggedIn }) => {
     try {
       const response = await login(username, password);
       localStorage.setItem("token", response.data.access_token);
+      localStorage.setItem("refreshToken", response.data.refresh_token);
       setIsLoggedIn(true);
     } catch (err) {
       console.log("hit")
