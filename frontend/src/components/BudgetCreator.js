@@ -1,49 +1,56 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { createBudget, updateBudget, createLineItem, updateLineItem, getLineItemsByBudgetId } from "../api"; // Import API functions
 import { formatDate } from "../utils";
 
 
-const BudgetCreator = ({ existingBudget }) => {
+const BudgetCreator = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const existingBudget = location.state?.budget;
+    const copiedLineItems = location.state?.lineItems;
+    
     const [budget, setBudget] = useState({
-      name: "",
-      startDate: "",
-      endDate: "",
+      name: existingBudget ? existingBudget.name : "",
+      startDate: existingBudget ? existingBudget.start_date : "",
+      endDate: existingBudget ? existingBudget.end_date : "",
     });
   
     const [lineItems, setLineItems] = useState([]);
   
     const lineItemTypes = ["Income", "Variable", "Fixed", "NotCounted"]; // Enum values
   
-    // Populate fields if editing an existing budget
+    // Populate fields if editing an existing budget or copying line items
     useEffect(() => {
       if (existingBudget) {
-        setBudget({
-          name: existingBudget.name,
-          startDate: existingBudget.start_date,
-          endDate: existingBudget.end_date,
-        });
-  
         const fetchLineItems = async () => {
           try {
             const response = await getLineItemsByBudgetId(existingBudget.id);
             const moved = response.data
             const updatedMoved = moved.map(item => ({
-              ...item, // Keep all other properties of the item
+              ...item,
               related_categories: Array.isArray(item.related_categories)
                 ? item.related_categories.join(", ")
-                : item.related_categories // Ensure it's unchanged if not an array
+                : item.related_categories
             }));
             setLineItems(updatedMoved);
           } catch (error) {
             console.error("Error fetching line items:", error);
           }
         };
-  
         fetchLineItems();
+      } else if (copiedLineItems) {
+        // When copying, clear the IDs and set the line items
+        const copiedItems = copiedLineItems.map(item => ({
+          ...item,
+          id: null,
+          related_categories: Array.isArray(item.related_categories)
+            ? item.related_categories.join(", ")
+            : item.related_categories
+        }));
+        setLineItems(copiedItems);
       }
-    }, [existingBudget]);
+    }, [existingBudget, copiedLineItems]);
   
     const handleLineItemChange = (index, field, value) => {
       const updatedLineItems = [...lineItems];

@@ -105,8 +105,12 @@ const BudgetList = () => {
               {new Date(budget.end_date).toLocaleDateString()}
             </p>
 
-            <Link to="/create-budget" state={{ budget }} className="edit-link">
+            <Link to="/create-budget" state={{ budget, lineItems: lineItems[budget.id] }} className="edit-link">
               Edit Budget
+            </Link>
+
+            <Link to="/create-budget" state={{ lineItems: lineItems[budget.id] }} className="edit-link" style={{ marginLeft: "5px" }}>
+              Copy Budget
             </Link>
 
             <button className="delete-button" style={{ margin: "5px" }} onClick={() => deleteBudgetById(budget.id)}>Delete</button>
